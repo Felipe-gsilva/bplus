@@ -1,0 +1,4 @@
+/home/felipe-gsilva/dev/virtual-b-tree/target/CMakeFiles/VB-TREE.dir
+/home/felipe-gsilva/dev/virtual-b-tree/target/CMakeFiles/test.dir
+/home/felipe-gsilva/dev/virtual-b-tree/target/CMakeFiles/edit_cache.dir
+/home/felipe-gsilva/dev/virtual-b-tree/target/CMakeFiles/rebuild_cache.dir
