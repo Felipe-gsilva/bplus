@@ -1,1 +1,135 @@
-[]
+[
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-I/home/felipe-gsilva/dev/b+/src",
+      "-g3",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-std=gnu11",
+      "-c",
+      "-o",
+      "CMakeFiles/B-PLUS-TREE.dir/src/app.c.o",
+      "/home/felipe-gsilva/dev/b+/src/app.c"
+    ],
+    "directory": "/home/felipe-gsilva/dev/b+/target",
+    "file": "/home/felipe-gsilva/dev/b+/src/app.c",
+    "output": "/home/felipe-gsilva/dev/b+/target/CMakeFiles/B-PLUS-TREE.dir/src/app.c.o"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-I/home/felipe-gsilva/dev/b+/src",
+      "-g3",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-std=gnu11",
+      "-c",
+      "-o",
+      "CMakeFiles/B-PLUS-TREE.dir/src/b-tree-buf.c.o",
+      "/home/felipe-gsilva/dev/b+/src/b-tree-buf.c"
+    ],
+    "directory": "/home/felipe-gsilva/dev/b+/target",
+    "file": "/home/felipe-gsilva/dev/b+/src/b-tree-buf.c",
+    "output": "/home/felipe-gsilva/dev/b+/target/CMakeFiles/B-PLUS-TREE.dir/src/b-tree-buf.c.o"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-I/home/felipe-gsilva/dev/b+/src",
+      "-g3",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-std=gnu11",
+      "-c",
+      "-o",
+      "CMakeFiles/B-PLUS-TREE.dir/src/free-rrn-list.c.o",
+      "/home/felipe-gsilva/dev/b+/src/free-rrn-list.c"
+    ],
+    "directory": "/home/felipe-gsilva/dev/b+/target",
+    "file": "/home/felipe-gsilva/dev/b+/src/free-rrn-list.c",
+    "output": "/home/felipe-gsilva/dev/b+/target/CMakeFiles/B-PLUS-TREE.dir/src/free-rrn-list.c.o"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-I/home/felipe-gsilva/dev/b+/src",
+      "-g3",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-std=gnu11",
+      "-c",
+      "-o",
+      "CMakeFiles/B-PLUS-TREE.dir/src/io-buf.c.o",
+      "/home/felipe-gsilva/dev/b+/src/io-buf.c"
+    ],
+    "directory": "/home/felipe-gsilva/dev/b+/target",
+    "file": "/home/felipe-gsilva/dev/b+/src/io-buf.c",
+    "output": "/home/felipe-gsilva/dev/b+/target/CMakeFiles/B-PLUS-TREE.dir/src/io-buf.c.o"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-I/home/felipe-gsilva/dev/b+/src",
+      "-g3",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-std=gnu11",
+      "-c",
+      "-o",
+      "CMakeFiles/B-PLUS-TREE.dir/src/logger.c.o",
+      "/home/felipe-gsilva/dev/b+/src/logger.c"
+    ],
+    "directory": "/home/felipe-gsilva/dev/b+/target",
+    "file": "/home/felipe-gsilva/dev/b+/src/logger.c",
+    "output": "/home/felipe-gsilva/dev/b+/target/CMakeFiles/B-PLUS-TREE.dir/src/logger.c.o"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-I/home/felipe-gsilva/dev/b+/src",
+      "-g3",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-std=gnu11",
+      "-c",
+      "-o",
+      "CMakeFiles/B-PLUS-TREE.dir/src/queue.c.o",
+      "/home/felipe-gsilva/dev/b+/src/queue.c"
+    ],
+    "directory": "/home/felipe-gsilva/dev/b+/target",
+    "file": "/home/felipe-gsilva/dev/b+/src/queue.c",
+    "output": "/home/felipe-gsilva/dev/b+/target/CMakeFiles/B-PLUS-TREE.dir/src/queue.c.o"
+  },
+  {
+    "arguments": [
+      "/sbin/cc",
+      "-I/home/felipe-gsilva/dev/b+/src",
+      "-g3",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-std=gnu11",
+      "-c",
+      "-o",
+      "CMakeFiles/B-PLUS-TREE.dir/test/test.c.o",
+      "/home/felipe-gsilva/dev/b+/test/test.c"
+    ],
+    "directory": "/home/felipe-gsilva/dev/b+/target",
+    "file": "/home/felipe-gsilva/dev/b+/test/test.c",
+    "output": "/home/felipe-gsilva/dev/b+/target/CMakeFiles/B-PLUS-TREE.dir/test/test.c.o"
+  }
+]
