@@ -58,20 +58,31 @@ void cli(app *a) {
   page *p;
   data_record *d = malloc(sizeof(data_record));
   char placa[TAMANHO_PLACA];
+<<<<<<< HEAD
   char placa_b[TAMANHO_PLACA];
   u16 pos;
   key_range kr;
+=======
+  u16 pos;
+>>>>>>> refs/remotes/origin/main
   print_ascii_art();
 
   while (choice != 0) {
     printf("Choose an option:\n");
     printf("0. Exit\n");
     printf("1. Search by id\n");
+<<<<<<< HEAD
     printf("2. Search by range:\n");
     printf("3. Insert\n");
     printf("4. Remove\n");
     if (DEBUG)
       printf("5. Print root -- DEBUG\n");
+=======
+    printf("2. Insert\n");
+    printf("3. Remove\n");
+    if (DEBUG)
+      printf("4. Print root -- DEBUG\n");
+>>>>>>> refs/remotes/origin/main
 
     printf("Enter your choice: ");
     scanf("%d", &choice);
@@ -91,6 +102,7 @@ void cli(app *a) {
       puts("Page not found!");
       break;
     case 2:
+<<<<<<< HEAD
       get_id(0, placa);
       get_id(0, placa_b);
       strcpy(kr.start_id, placa);
@@ -98,6 +110,8 @@ void cli(app *a) {
       b_range_search(a->b, &kr);
       break;
     case 3:
+=======
+>>>>>>> refs/remotes/origin/main
       printf("Inserindo Veiculo:\n");
       get_id(0, d->placa);
       printf("Modelo:\n");
@@ -120,11 +134,19 @@ void cli(app *a) {
       b_insert(a->b, a->data, d, rrn);
       d_insert(a->data, d, a->ld, rrn);
       break;
+<<<<<<< HEAD
     case 4:
       get_id(0, placa);
       b_remove(a->b, a->data, placa);
       break;
     case 5:
+=======
+    case 3:
+      get_id(0, placa);
+      b_remove(a->b, a->data, placa);
+      break;
+    case 4:
+>>>>>>> refs/remotes/origin/main
       if (DEBUG)
         print_page(a->b->root);
       break;
@@ -162,8 +184,11 @@ void clear_app(app *app) {
     clear_io_buf(app->data);
     app->data = NULL;
   }
+<<<<<<< HEAD
   clear_all_pages();
 
+=======
+>>>>>>> refs/remotes/origin/main
   if (app->b) {
     clear_tree_buf(app->b);
     app->b = NULL;
@@ -178,7 +203,10 @@ void clear_app(app *app) {
   }
   if (app != NULL)
     puts("!! Error while clearing app");
+<<<<<<< HEAD
   
+=======
+>>>>>>> refs/remotes/origin/main
 }
 
 int main(int argc, char **argv) {
