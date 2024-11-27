@@ -170,7 +170,7 @@ void load_list(free_rrn_list *i, char *s) {
   }
 
   fflush(i->io->fp);
-  if(DEBUG)
+  if (DEBUG)
     printf("@Loaded RRN list with %d entries\n", i->n);
 }
 
@@ -270,10 +270,10 @@ void insert_list(free_rrn_list *i, int rrn) {
     return;
   }
 
-  if(DEBUG)
+  if (DEBUG)
     printf("Current count before insertion: %d\n", i->n);
   if (rrn_exists(i->free_rrn, i->n, rrn)) {
-    if(DEBUG)
+    if (DEBUG)
       printf("@RRN %d already exists in the list\n", rrn);
     return;
   }

@@ -74,56 +74,59 @@ void print_queue(queue *q) {
 }
 
 void push_page(b_tree_buf *b, page *p) {
-    if (!b || !b->q || !p) {
-        puts("!!Error: NULL queue pointer or page");
-        return;
-    }
+  if (!b || !b->q || !p) {
+    puts("!!Error: NULL queue pointer or page");
+    return;
+  }
 
-    if (queue_search(b->q, p->rrn)) {
-        if (DEBUG) puts("@Page already in queue");
-        return;
-    }
+  if (queue_search(b->q, p->rrn)) {
+    if (DEBUG)
+      puts("@Page already in queue");
+    return;
+  }
 
-    if (b->q->counter >= P) {
-        pop_page(b);
-    }
+  if (b->q->counter >= P) {
+    pop_page(b);
+  }
 
-    queue *new_node = malloc(sizeof(queue));
-    if (!new_node) {
-        puts("!!Error: Memory allocation failed");
-        return;
-    }
+  queue *new_node = malloc(sizeof(queue));
+  if (!new_node) {
+    puts("!!Error: Memory allocation failed");
+    return;
+  }
 
-    new_node->page = p;
-    new_node->next = b->q->next;
-    b->q->next = new_node;
-    b->q->counter++;
+  new_node->page = p;
+  new_node->next = b->q->next;
+  b->q->next = new_node;
+  b->q->counter++;
 
-    if (DEBUG) puts("@Pushed page onto queue");
+  if (DEBUG)
+    puts("@Pushed page onto queue");
 }
 
 page *pop_page(b_tree_buf *b) {
-    if (!b->q || b->q->next == NULL) {
-        puts("!!Error: NULL or Empty queue pointer");
-        return NULL;
-    }
+  if (!b->q || b->q->next == NULL) {
+    puts("!!Error: NULL or Empty queue pointer");
+    return NULL;
+  }
 
-    queue *head = b->q->next;
-    page *page = head->page;
+  queue *head = b->q->next;
+  page *page = head->page;
 
-    b->q->next = head->next;
-    b->q->counter--;
+  b->q->next = head->next;
+  b->q->counter--;
 
-    if (DEBUG)
-        puts("@Popped from queue");
+  if (DEBUG)
+    puts("@Popped from queue");
 
-    free(head);
-    return page;
+  free(head);
+  return page;
 }
 page *queue_search(queue *q, u16 rrn) {
-  if (!q) return NULL;
-  
-  queue *current = q->next;  
+  if (!q)
+    return NULL;
+
+  queue *current = q->next;
   while (current) {
     if (current->page && current->page->rrn == rrn) {
       if (DEBUG) {

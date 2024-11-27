@@ -218,7 +218,8 @@ void b_range_search(b_tree_buf *b, io_buf *data, key_range *range) {
 
       if (strcmp(curr->keys[i].id, range->start_id) >= 0) {
         found_any = true;
-        data_record *record = load_data_record(data, curr->keys[i].data_register_rrn);
+        data_record *record =
+            load_data_record(data, curr->keys[i].data_register_rrn);
         if (record) {
           print_data_record(record);
           free(record);
@@ -310,18 +311,21 @@ u16 search_key(b_tree_buf *b, page *p, key k, u16 *found_pos,
 }
 
 void populate_key(key *k, data_record *d, u16 rrn) {
-  if (!k || !d) return;
-  
+  if (!k || !d)
+    return;
+
   strncpy(k->id, d->placa, TAMANHO_PLACA);
-  k->data_register_rrn = rrn;  
-  
+  k->data_register_rrn = rrn;
+
   if (DEBUG) {
-    printf("@Populated key with ID: %s and data RRN: %hu\n", k->id, k->data_register_rrn);
+    printf("@Populated key with ID: %s and data RRN: %hu\n", k->id,
+           k->data_register_rrn);
   }
 }
 
 btree_status insert_in_page(page *p, key k, page *r_child, int pos) {
-  if (!p) return BTREE_ERROR_INVALID_PAGE;
+  if (!p)
+    return BTREE_ERROR_INVALID_PAGE;
 
   if (DEBUG) {
     printf("Current state - keys: %d, children: %d, inserting at pos: %d\n",
@@ -344,8 +348,8 @@ btree_status insert_in_page(page *p, key k, page *r_child, int pos) {
   }
 
   if (DEBUG) {
-    printf("After insertion - keys: %d, children: %d\n",
-           p->keys_num, p->child_num);
+    printf("After insertion - keys: %d, children: %d\n", p->keys_num,
+           p->child_num);
     printf("Inserted key with data RRN: %hu\n", k.data_register_rrn);
   }
 
@@ -353,15 +357,17 @@ btree_status insert_in_page(page *p, key k, page *r_child, int pos) {
 }
 
 btree_status b_insert(b_tree_buf *b, io_buf *data, data_record *d, u16 rrn) {
-  if (!b || !data || !d) return BTREE_ERROR_INVALID_PAGE;
+  if (!b || !data || !d)
+    return BTREE_ERROR_INVALID_PAGE;
 
   key new_key;
   populate_key(&new_key, d, rrn);
 
   if (!b->root) {
     b->root = alloc_page();
-    if (!b->root) return BTREE_ERROR_MEMORY;
-    
+    if (!b->root)
+      return BTREE_ERROR_MEMORY;
+
     b->root->rrn = get_free_rrn(b->i);
     if (b->root->rrn < 0) {
       free(b->root);
@@ -372,7 +378,7 @@ btree_status b_insert(b_tree_buf *b, io_buf *data, data_record *d, u16 rrn) {
     b->root->keys[0] = new_key;
     b->root->keys_num = 1;
     b->root->leaf = true;
-    
+
     return write_index_record(b, b->root);
   }
 
@@ -380,16 +386,18 @@ btree_status b_insert(b_tree_buf *b, io_buf *data, data_record *d, u16 rrn) {
   page *r_child = NULL;
   bool promoted = false;
 
-  btree_status status = insert_key(b, b->root, new_key, &promo_key, &r_child, &promoted);
-  
+  btree_status status =
+      insert_key(b, b->root, new_key, &promo_key, &r_child, &promoted);
+
   if (status < 0) {
     return status;
   }
-  
+
   if (promoted) {
     page *new_root = alloc_page();
-    if (!new_root) return BTREE_ERROR_MEMORY;
-    
+    if (!new_root)
+      return BTREE_ERROR_MEMORY;
+
     new_root->rrn = get_free_rrn(b->i);
     if (new_root->rrn < 0) {
       free(new_root);
@@ -404,12 +412,14 @@ btree_status b_insert(b_tree_buf *b, io_buf *data, data_record *d, u16 rrn) {
     new_root->child_num = 2;
 
     b->root = new_root;
-    
+
     btree_status write_status = write_root_rrn(b, b->root->rrn);
-    if (write_status < 0) return write_status;
-    
+    if (write_status < 0)
+      return write_status;
+
     write_status = write_index_record(b, b->root);
-    if (write_status < 0) return write_status;
+    if (write_status < 0)
+      return write_status;
   }
 
   return BTREE_SUCCESS;
