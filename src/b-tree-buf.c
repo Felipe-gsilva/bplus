@@ -181,7 +181,11 @@ page *b_search(b_tree_buf *b, const char *s, u16 *return_pos) {
   page *found_page = NULL;
   *return_pos = search_key(b, b->root, k, return_pos, &found_page);
 
-  return found_page;
+  if (found_page->leaf)
+    return found_page;
+
+  *return_pos = (u16)-1;
+  return NULL;
 }
 
 void b_range_search(b_tree_buf *b, io_buf *data, key_range *range) {
@@ -583,133 +587,151 @@ btree_status insert_key(b_tree_buf *b, page *p, key k, key *promo_key,
   return b_split(b, p, r_child, promo_key, &k, promoted);
 }
 
-btree_status b_remove(b_tree_buf *b, io_buf *data, const char *placa) {
-  if (!b || !b->root || !placa) {
+btree_status b_remove(b_tree_buf *b, io_buf *data, char *key_id) {
+  if (!b || !b->root || !data || !key_id)
     return BTREE_ERROR_INVALID_PAGE;
+
+  if (DEBUG)
+    printf("@Removing key: %s\n", key_id);
+
+  u16 pos;
+  page *p = b_search(b, key_id, &pos);
+  if (!p || strcmp(p->keys[pos].id, key_id) != 0) {
+    if (DEBUG)
+      puts("@Key not found");
+    return BTREE_NOT_FOUND_KEY;
   }
 
-  key k;
-  strncpy(k.id, placa, TAMANHO_PLACA - 1);
-  k.id[TAMANHO_PLACA - 1] = '\0';
+  if (p->leaf) {
+    if (DEBUG)
+      printf("@Removing key from leaf page RRN: %hu at position: %hu\n", p->rrn,
+             pos);
+    u16 data_rrn = p->keys[pos].data_register_rrn;
 
-  bool underflow = false;
-  btree_status status = remove_key(b, b->root, k, &underflow);
+    for (int i = pos; i < p->keys_num - 1; i++)
+      p->keys[i] = p->keys[i + 1];
+    p->keys_num--;
 
-  if (status == BTREE_SUCCESS && b->root->keys_num == 0 && !b->root->leaf) {
-    page *old_root = b->root;
-    b->root = load_page(b, b->root->children[0]);
-    write_root_rrn(b, b->root->rrn);
-    free(old_root);
-  }
-
-  return status;
-}
-
-btree_status remove_key(b_tree_buf *b, page *p, key k, bool *merged) {
-  int pos;
-  btree_status status = search_in_page(p, k, &pos);
-
-  if (status == BTREE_FOUND_KEY) {
-    if (p->leaf) {
-      for (int i = pos; i < p->keys_num - 1; i++) {
-        p->keys[i] = p->keys[i + 1];
+    if (data_rrn != (u16)-1) {
+      if (fseek(data->fp,
+                data->hr->header_size + (data_rrn * sizeof(data_record)),
+                SEEK_SET) == 0) {
+        data_record empty_record;
+        memset(&empty_record, '*', sizeof(data_record));
+        fwrite(&empty_record, sizeof(data_record), 1, data->fp);
+        fflush(data->fp);
+        insert_list(b->i, data_rrn);
       }
-      p->keys_num--;
-      insert_list(b->i, p->rrn);
-      *merged = (p->keys_num < (ORDER - 1) / 2);
-      return BTREE_SUCCESS;
-    } else {
-      page *child = load_page(b, p->children[pos]);
-      page *sibling = load_page(b, p->children[pos + 1]);
-      if (child->keys_num > (ORDER - 1) / 2) {
-        key pred_key = child->keys[child->keys_num - 1];
-        remove_key(b, child, pred_key, merged);
-        p->keys[pos] = pred_key;
-      } else if (sibling->keys_num > (ORDER - 1) / 2) {
-        key succ_key = sibling->keys[0];
-        remove_key(b, sibling, succ_key, merged);
-        p->keys[pos] = succ_key;
-      } else {
-        merge(b, p, pos);
-        remove_key(b, child, k, merged);
-      }
+    }
+
+    if (p == b->root && p->keys_num == 0) {
+      clear_page(b->root);
+      b->root = NULL;
       return BTREE_SUCCESS;
     }
-  } else {
-    if (p->leaf) {
-      return BTREE_NOT_FOUND_KEY;
-    } else {
-      page *child = load_page(b, p->children[pos]);
-      bool child_merged = false;
-      status = remove_key(b, child, k, &child_merged);
-      if (child_merged) {
-        if (pos > 0) {
-          redistribute(b, p, pos - 1);
-        } else {
-          redistribute(b, p, pos);
-        }
-      }
+
+    btree_status status = write_index_record(b, p);
+    if (status < 0)
       return status;
-    }
-  }
-}
 
-btree_status redistribute(b_tree_buf *b, page *p, int pos) {
-  page *left = load_page(b, p->children[pos]);
-  page *right = load_page(b, p->children[pos + 1]);
+    if (p != b->root && p->keys_num < (ORDER - 1) / 2) {
+      if (DEBUG)
+        puts("@Leaf underflow detected");
 
-  if (left->keys_num > (ORDER - 1) / 2) {
-    for (int i = right->keys_num; i > 0; i--) {
-      right->keys[i] = right->keys[i - 1];
+      page *left = get_sibling(b, p, true);
+      if (left && left->keys_num > (ORDER - 1) / 2) {
+        return redistribute(b, left, p, true);
+      }
+
+      page *right = get_sibling(b, p, false);
+      if (right && right->keys_num > (ORDER - 1) / 2) {
+        return redistribute(b, right, p, false);
+      }
+
+      if (left) {
+        return merge(b, left, p);
+      } else if (right) {
+        return merge(b, p, right);
+      }
     }
-    right->keys[0] = p->keys[pos];
-    p->keys[pos] = left->keys[left->keys_num - 1];
-    left->keys_num--;
-    right->keys_num++;
-  } else if (right->keys_num > (ORDER - 1) / 2) {
-    left->keys[left->keys_num] = p->keys[pos];
-    p->keys[pos] = right->keys[0];
-    for (int i = 0; i < right->keys_num - 1; i++) {
-      right->keys[i] = right->keys[i + 1];
-    }
-    right->keys_num--;
-    left->keys_num++;
-  } else {
-    return merge(b, p, pos);
+
+    return BTREE_SUCCESS;
   }
 
-  write_index_record(b, left);
-  write_index_record(b, right);
-  write_index_record(b, p);
-
+  if (DEBUG)
+    puts("@Key found in internal node - not removing");
   return BTREE_SUCCESS;
 }
 
-btree_status merge(b_tree_buf *b, page *p, int pos) {
-  page *left = load_page(b, p->children[pos]);
-  page *right = load_page(b, p->children[pos + 1]);
+btree_status redistribute(b_tree_buf *b, page *donor, page *receiver,
+                          bool from_left) {
+  if (!b || !donor || !receiver)
+    return BTREE_ERROR_INVALID_PAGE;
 
-  left->keys[left->keys_num] = p->keys[pos];
-  left->keys_num++;
+  if (from_left) {
+    for (int i = receiver->keys_num; i > 0; i--)
+      receiver->keys[i] = receiver->keys[i - 1];
+    receiver->keys[0] = donor->keys[donor->keys_num - 1];
+    donor->keys_num--;
+    receiver->keys_num++;
+  } else {
+    receiver->keys[receiver->keys_num] = donor->keys[0];
+    receiver->keys_num++;
+
+    for (int i = 0; i < donor->keys_num - 1; i++) {
+      donor->keys[i] = donor->keys[i + 1];
+    }
+    donor->keys_num--;
+  }
+
+  btree_status status = write_index_record(b, donor);
+  if (status < 0)
+    return status;
+
+  return write_index_record(b, receiver);
+}
+
+btree_status merge(b_tree_buf *b, page *left, page *right) {
+  if (!b || !left || !right)
+    return BTREE_ERROR_INVALID_PAGE;
 
   for (int i = 0; i < right->keys_num; i++) {
     left->keys[left->keys_num + i] = right->keys[i];
   }
   left->keys_num += right->keys_num;
 
-  for (int i = pos; i < p->keys_num - 1; i++) {
-    p->keys[i] = p->keys[i + 1];
-    p->children[i + 1] = p->children[i + 2];
-  }
-  p->keys_num--;
+  left->next_leaf = right->next_leaf;
+
+  btree_status status = write_index_record(b, left);
+  if (status < 0)
+    return status;
 
   insert_list(b->i, right->rrn);
-  right = NULL;
-
-  write_index_record(b, left);
-  write_index_record(b, p);
 
   return BTREE_SUCCESS;
+}
+
+page *get_sibling(b_tree_buf *b, page *p, bool left) {
+  if (!b || !p || !b->root)
+    return NULL;
+
+  page *parent = find_parent(b, b->root, p);
+  if (!parent)
+    return NULL;
+
+  int pos;
+  for (pos = 0; pos <= parent->child_num; pos++) {
+    if (parent->children[pos] == p->rrn)
+      break;
+  }
+
+  if (left && pos > 0) {
+    return load_page(b, parent->children[pos - 1]);
+  } else if (!left && pos < parent->child_num - 1) {
+    return load_page(b, parent->children[pos + 1]);
+  }
+
+  return NULL;
 }
 
 void print_page(page *p) {
@@ -1031,4 +1053,37 @@ void track_page(page *p) {
   }
 
   g_allocated[g_n++] = p;
+}
+
+page *find_parent(b_tree_buf *b, page *current, page *target) {
+  if (!b || !current || !target)
+    return NULL;
+
+  if (target == b->root)
+    return NULL;
+
+  for (int i = 0; i < current->child_num; i++) {
+    if (current->children[i] == target->rrn) {
+      return current;
+    }
+  }
+
+  if (!current->leaf) {
+    for (int i = 0; i < current->child_num; i++) {
+      page *child = load_page(b, current->children[i]);
+      if (!child)
+        continue;
+
+      page *result = find_parent(b, child, target);
+
+      if (child != b->root && !queue_search(b->q, child->rrn)) {
+        clear_page(child);
+      }
+
+      if (result)
+        return result;
+    }
+  }
+
+  return NULL;
 }

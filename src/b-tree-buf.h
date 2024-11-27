@@ -7,7 +7,11 @@ b_tree_buf *alloc_tree_buf(void);
 
 void build_tree(b_tree_buf *b, io_buf *data, int n);
 
-void populate_key(key *k, data_record *d, u16 rrn);
+btree_status handle_underflow(b_tree_buf *b, page *p);
+
+page *get_sibling(b_tree_buf *b, page *p, bool left);
+
+page *find_parent(b_tree_buf *b, page *current, page *target);
 
 btree_status b_insert(b_tree_buf *b, io_buf *data, data_record *d, u16 rrn);
 
@@ -34,13 +38,13 @@ u16 search_key(b_tree_buf *b, page *p, key key, u16 *found_pos,
 
 int search_in_page(page *page, key key, int *return_pos);
 
-btree_status b_remove(b_tree_buf *b, io_buf *data, const char *placa);
+btree_status b_remove(b_tree_buf *b, io_buf *data, char *key_id);
 
 btree_status remove_key(b_tree_buf *b, page *p, key k, bool *merged);
 
-btree_status redistribute(b_tree_buf *b, page *p, int pos);
+btree_status redistribute(b_tree_buf *b, page *donor, page *receiver, bool from_left);
 
-btree_status merge(b_tree_buf *b, page *p, int pos);
+btree_status merge(b_tree_buf *b, page *left, page *right);
 
 void print_page(page *page);
 
