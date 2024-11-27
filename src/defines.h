@@ -9,7 +9,7 @@
 #include <string.h>
 
 #define DEBUG 0 // 1 for dev mode, 0 for prod mode
-#define ORDER 8
+#define ORDER 5
 
 // in bytes
 #define MAX_ADDRESS 4096
@@ -88,7 +88,6 @@ struct page {
   u8 child_num;
   u8 keys_num;
   u8 leaf;
-  u8 parent;
 };
 
 #pragma pack(pop)

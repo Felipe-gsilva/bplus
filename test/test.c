@@ -39,42 +39,47 @@ void test_tree(b_tree_buf *b, io_buf *data, int n) {
     puts("!!Invalid parameters");
     return;
   }
+  
   int errors = 0;
   u16 pos;
+  
   if (!b->i) {
     load_list(b->i, b->io->br->free_rrn_address);
     if (b->i && DEBUG) {
       puts("@Loaded rrn list");
     }
   }
-  data_record d;
-  page *p = alloc_page();
+  
   for (int i = 0; i < n; i++) {
-    d = *load_data_record(data, i);
+    data_record *d = load_data_record(data, i);
+    if (!d) continue;
+    
     puts("--------------");
     printf("TEST NUM %d\n", i);
-    printf("tested ids %s\n", d.placa);
+    printf("tested ids %s\n", d->placa);
 
-    p = b_search(b, d.placa, &pos);
+    page *p = b_search(b, d->placa, &pos);
     if (!p) {
       errors++;
-    }
-    if (p)
+      printf("!!Error: Page not found for key %s\n", d->placa);
+    } else {
       print_page(p);
+    }
   }
+  
   printf("ASSERTS: %d \tERRRORS: %d\t", n - errors, errors);
   if (DEBUG) {
     puts("@Built tree");
   }
 }
 
-void test_range_search(b_tree_buf *b) {
+void test_range_search(b_tree_buf *b, io_buf *data) {
   key_range range;
   strcpy(range.start_id, "AAA1111");
   strcpy(range.end_id, "AAA9999");
   
   puts("Testing range search...");
-  b_range_search(b, &range);
+  b_range_search(b, data, &range);
 }
 
 void test_leaf_links(b_tree_buf *b) {

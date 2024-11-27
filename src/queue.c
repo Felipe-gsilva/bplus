@@ -74,85 +74,64 @@ void print_queue(queue *q) {
 }
 
 void push_page(b_tree_buf *b, page *p) {
-  if (!b->q || !p) {
-    puts("!!Error: NULL queue pointer or page");
-    return;
-  }
-
-  page *temp_page = queue_search(b->q, p->rrn);
-  if (temp_page != NULL) {
-    if (DEBUG)
-      puts("@Page already found in queue");
-    temp_page->keys_num = p->keys_num;
-    temp_page->child_num = p->child_num;
-    temp_page->leaf = p->leaf;
-    memcpy(temp_page->keys, p->keys, sizeof(key) * p->keys_num);
-    memcpy(temp_page->children, p->children, sizeof(u16) * p->child_num);
-    return;
-  }
-
-  if (b->q->counter > P) {
-    page *popped_page = pop_page(b);
-    if (DEBUG && popped_page) {
-      printf("@Popped page with RRN %hu from queue\n", popped_page->rrn);
+    if (!b || !b->q || !p) {
+        puts("!!Error: NULL queue pointer or page");
+        return;
     }
-  }
 
-  queue *new_node = malloc(sizeof(queue)); // Use malloc instead of alloc_queue
-  if (!new_node) {
-    puts("!!Error: Memory allocation failed");
-    return;
-  }
+    if (queue_search(b->q, p->rrn)) {
+        if (DEBUG) puts("@Page already in queue");
+        return;
+    }
 
-  new_node->page = p;
-  new_node->next = NULL;
+    if (b->q->counter >= P) {
+        pop_page(b);
+    }
 
-  queue *temp = b->q;
-  while (temp->next != NULL) {
-    temp = temp->next;
-  }
-  temp->next = new_node;
-  b->q->counter++;
-  if (DEBUG)
-    puts("@Pushed page onto queue");
+    queue *new_node = malloc(sizeof(queue));
+    if (!new_node) {
+        puts("!!Error: Memory allocation failed");
+        return;
+    }
+
+    new_node->page = p;
+    new_node->next = b->q->next;
+    b->q->next = new_node;
+    b->q->counter++;
+
+    if (DEBUG) puts("@Pushed page onto queue");
 }
 
 page *pop_page(b_tree_buf *b) {
-  if (!b->q || b->q->next == NULL) {
-    puts("!!Error: NULL or Empty queue pointer");
-    return NULL;
-  }
+    if (!b->q || b->q->next == NULL) {
+        puts("!!Error: NULL or Empty queue pointer");
+        return NULL;
+    }
 
-  queue *head = b->q->next;
-  page *page = head->page;
+    queue *head = b->q->next;
+    page *page = head->page;
 
-  b->q->next = head->next;
-  b->q->counter--;
+    b->q->next = head->next;
+    b->q->counter--;
 
-  if (DEBUG)
-    puts("@Popped from queue");
+    if (DEBUG)
+        puts("@Popped from queue");
 
-  head->page = NULL;
-  free(head);
-  return page;
+    free(head);
+    return page;
 }
 page *queue_search(queue *q, u16 rrn) {
-  if (!q) {
-    if (DEBUG)
-      puts("!!Error: NULL or Empty queue pointer");
-    return NULL;
-  }
-  queue *temp = q->next;
-  while (temp != NULL) {
-    if (temp->page && temp->page->rrn == rrn) {
-      if (DEBUG)
+  if (!q) return NULL;
+  
+  queue *current = q->next;  
+  while (current) {
+    if (current->page && current->page->rrn == rrn) {
+      if (DEBUG) {
         printf("@Page with RRN %hu found in queue\n", rrn);
-      return temp->page;
+      }
+      return current->page;
     }
-    temp = temp->next;
+    current = current->next;
   }
-
-  if (DEBUG)
-    printf("@Page with RRN %hu not found in queue\n", rrn);
   return NULL;
 }

@@ -95,7 +95,7 @@ void cli(app *a) {
       get_id(0, placa_b);
       strcpy(kr.start_id, placa);
       strcpy(kr.end_id, placa_b);
-      b_range_search(a->b, &kr);
+      b_range_search(a->b, a->data, &kr);
       break;
     case 3:
       printf("Inserindo Veiculo:\n");

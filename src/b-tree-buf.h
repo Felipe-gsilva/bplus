@@ -27,14 +27,14 @@ int write_root_rrn(b_tree_buf *b, u16 rrn);
 
 page *b_search(b_tree_buf *b, const char *s, u16 *return_pos);
 
-void b_range_search(b_tree_buf *b, key_range *range);
+void b_range_search(b_tree_buf *b, io_buf *data, key_range *range);
 
 u16 search_key(b_tree_buf *b, page *p, key key, u16 *found_pos,
                page **return_page);
 
 int search_in_page(page *page, key key, int *return_pos);
 
-void b_remove(b_tree_buf *b, io_buf *data, const char *placa);
+btree_status b_remove(b_tree_buf *b, io_buf *data, const char *placa);
 
 btree_status remove_key(b_tree_buf *b, page *p, key k, bool *merged);
 
@@ -61,5 +61,7 @@ page *new_page(u16 rrn);
 void clear_page(page *page);
 
 void clear_all_pages(void);
+
+void track_page(page *p);
 
 #endif
